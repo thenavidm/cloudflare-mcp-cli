@@ -8,6 +8,7 @@
 - Remove deprecated bulk settings, legacy analytics and firewall writer routes; document deliberate Rulesets/analytics migration.
 - Enforce direct-call read-only/disabled policies, isolated private profiles, token-kind verification and active-token diagnostics.
 - Preserve fixed origin, bounded JSON/GraphQL, provider-error detection, credential redaction and no automatic replay.
+- Preserve LF metadata checksums across Windows/macOS/Linux checkouts.
 - Add complete house docs, OS/client setup, pinned official/community comparison and offline/checksum-reviewed schema maintenance. Preserve AGPL and private legacy history.
 
 ## 1.0.0 - private legacy source
