@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Use the native terminal capture at 1040 source pixels with lossless GIF optimization, displayed at 520 pixels, matching the Bluesky/Substack reference. Original assets remain available.
+
 ## 2.0.0 - 2026-10-03
 
 - Refresh 22 selected current native Cloudflare REST operations and seven helpers with shared CLI/local MCP and desktop framework.
