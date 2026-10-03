@@ -1,0 +1,107 @@
+{
+  "manifest_version": "0.2",
+  "name": "cloudflare",
+  "display_name": "Cloudflare",
+  "version": "2.0.0",
+  "description": "Focused shared Cloudflare MCP and CLI. Every mutation requires explicit confirmation.",
+  "long_description": "Focused current Cloudflare REST management with 29 shared MCP tools/CLI commands, 18 reads and 11 explicitly confirmed mutations. Includes local schemas/previews, bounded pages, query-only analytics and a reviewed DNS batch digest. Official cf and Code Mode cover a much broader API. No automatic request retries; account outcomes and desktop GUI installation are separate checks.",
+  "author": {
+    "name": "Navid Moazzez",
+    "url": "https://navid.me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thenavidm/cloudflare-mcp-cli"
+  },
+  "homepage": "https://github.com/thenavidm/cloudflare-mcp-cli",
+  "documentation": "https://github.com/thenavidm/cloudflare-mcp-cli/blob/main/INSTALL.md",
+  "support": "https://github.com/thenavidm/cloudflare-mcp-cli/issues",
+  "license": "AGPL-3.0-or-later",
+  "keywords": [
+    "cloudflare",
+    "dns",
+    "rulesets",
+    "private-accounts",
+    "mcp",
+    "cli",
+    "desktop-extension",
+    "mutation-approval"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "${user_config.api_key}",
+        "CLOUDFLARE_TOKEN_FILE": "${user_config.token_file}",
+        "CLOUDFLARE_ACCOUNT_ID": "${user_config.account_id}",
+        "CLOUDFLARE_ZONE_ID": "${user_config.zone_id}",
+        "CLOUDFLARE_TOKEN_KIND": "${user_config.token_kind}",
+        "CLOUDFLARE_READ_ONLY": "${user_config.read_only}",
+        "CLOUDFLARE_ALLOW_DESTRUCTIVE": "${user_config.allow_operations}"
+      }
+    }
+  },
+  "user_config": {
+    "token_file": {
+      "type": "string",
+      "title": "Private token-only file",
+      "description": "Absolute regular owner-only token file, at most 64 KB. Never bundle it.",
+      "required": false
+    },
+    "read_only": {
+      "type": "boolean",
+      "title": "Read only",
+      "description": "Hide and refuse all 11 mutations, including reviewed batch submission.",
+      "default": false,
+      "required": false
+    },
+    "api_key": {
+      "type": "string",
+      "title": "Cloudflare API token",
+      "description": "Least-privilege Cloudflare Bearer API token; stored privately by the desktop client.",
+      "required": false,
+      "sensitive": true
+    },
+    "allow_operations": {
+      "type": "boolean",
+      "title": "Allow explicitly confirmed account operations",
+      "description": "Allow only explicitly confirmed mutations; read-only still takes precedence.",
+      "default": true,
+      "required": false
+    },
+    "account_id": {
+      "type": "string",
+      "title": "Default account ID",
+      "description": "Optional Cloudflare account ID for account-scoped requests and account-token verification.",
+      "required": false
+    },
+    "zone_id": {
+      "type": "string",
+      "title": "Default zone ID",
+      "description": "Optional Cloudflare zone ID. This is a routing default, not a token permission boundary.",
+      "required": false
+    },
+    "token_kind": {
+      "type": "string",
+      "title": "Token kind",
+      "description": "Use user for a user API token or account for an account-owned token; affects doctor --network only.",
+      "required": false,
+      "default": "user"
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=22"
+    }
+  }
+}

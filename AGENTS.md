@@ -1,0 +1,3 @@
+# Cloudflare maintenance
+
+Read README, INSTALL, COMPARISON and RELEASE-CHECKLIST. Preserve AGPL, BSD schema notices and private legacy history. Reuse the shared house CLI, SDK transport and guard. Keep pinned schemas, mandatory confirmation/read-only/disabled direct-call policy, isolated profiles, fixed origin, bounded reads/JSON/query-only analytics, exact DNS batch digest and no automatic retries. Use scripts/sync-openapi.mjs with explicit reviewed local JSON/checksum/source SHA; never import source code or distribute vendor examples. Regenerate full argument docs and check native body unions/phase permissions. Codex first; no inferred token winner. Verify all public artifacts, house rendering and full CMS guide before completion.

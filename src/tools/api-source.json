@@ -1,0 +1,25 @@
+{
+  "checked": "2026-10-03",
+  "repo": "cloudflare/api-schemas",
+  "sha": "37e7a4ae9c5123a2c58929a100c42cb4584edc57",
+  "url": "https://raw.githubusercontent.com/cloudflare/api-schemas/37e7a4ae9c5123a2c58929a100c42cb4584edc57/openapi.json",
+  "bytes": 26672955,
+  "sha256": "c6c066c4360a21c4cb8d3e3dc9341e9a8538635e6f804ef6cc8d6700c1eee31a",
+  "info": {
+    "description": "Welcome to Cloudflare's API documentation site. We are experimenting with an updated version of our API documentation - check out [developers.cloudflare.com/api-next/](https://developers.cloudflare.com/api-next/) to test out the new experience.\n\nTo get started using Cloudflare's products and services via the API, refer to [how to interact with Cloudflare](https://developers.cloudflare.com/fundamentals/basic-tasks/interact-with-cloudflare/), which covers using tools like [Terraform](https://developers.cloudflare.com/terraform/#cloudflare-terraform) and the [official SDKs](https://developers.cloudflare.com/fundamentals/api/reference/sdks/) to maintain your Cloudflare resources.\n\nUsing the Cloudflare API requires authentication so that Cloudflare knows who is making requests and what permissions you have. Create an API token to grant access to the API to perform actions. You can also authenticate with [API keys](https://developers.cloudflare.com/fundamentals/api/get-started/keys/), but these keys have [several limitations](https://developers.cloudflare.com/fundamentals/api/get-started/keys/#limitations) that make them less secure than API tokens. Whenever possible, use API tokens to interact with the Cloudflare API.\n\nTo create an API token, from the Cloudflare dashboard, go to My Profile > API Tokens and select Create Token. For more information on how to create and troubleshoot API tokens, refer to\nour [API fundamentals](https://developers.cloudflare.com/fundamentals/api/).\n\nFor information regarding rate limits, refer to our [API Rate Limits](https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/platform/limits/#api-rate-limits).\n\nTotally new to Cloudflare? [Start here](https://developers.cloudflare.com/fundamentals/get-started/).",
+    "license": {
+      "name": "BSD-3-Clause",
+      "url": "https://opensource.org/licenses/BSD-3-Clause"
+    },
+    "title": "Cloudflare API",
+    "version": "4.0.0"
+  },
+  "operationCount": 22,
+  "selectedSurface": "Current zones/DNS/cache/settings/Workers metadata/rulesets and read-only Page Rules, with local approved DNS batch workflow; not full API parity.",
+  "notes": [
+    "Official cf 1.0.0-beta.12 already covers >2900 commands, dry-run, named profiles, schema discovery and local resources.",
+    "Deprecated zone analytics/firewall routes excluded; migrate to GraphQL Analytics and Rulesets explicitly.",
+    "Examples and vendor code samples excluded from distributed metadata."
+  ],
+  "distributedMetadataSha256": "6db6e400132b3f07cd18076644b10d91f33e36c91a79794bbd854a7aa1248fcb"
+}
