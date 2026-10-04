@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "cloudflare",
   "display_name": "Cloudflare",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Focused shared Cloudflare MCP and CLI. Every mutation requires explicit confirmation.",
   "long_description": "Focused current Cloudflare REST management with 29 shared MCP tools/CLI commands, 18 reads and 11 explicitly confirmed mutations. Includes local schemas/previews, bounded pages, query-only analytics and a reviewed DNS batch digest. Official cf and Code Mode cover a much broader API. No automatic request retries; account outcomes and desktop GUI installation are separate checks.",
   "author": {
