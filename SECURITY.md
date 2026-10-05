@@ -10,9 +10,11 @@ Known credential keys, configured secrets and recognized signed URLs are redacte
 
 Optional audit logging stores policy metadata, not bodies. The package does not automatically persist provider responses or backups; private input/output files you create remain on your system until you manage them. Revoke tokens through Cloudflare, not npm.
 
-Every one of the eleven mutations requires confirm=true in MCP or --confirm in the CLI. The same WriteGuard runs before file loading/provider execution. Creation, edits, replacement, deletion, cache purge and Ruleset changes all require explicit intent. --agent and --yes never grant it.
+Every one of the eleven mutations requires confirm=true in MCP or --confirm in the CLI. The same write guard runs before file loading/provider execution. Creation, edits, replacement, deletion, cache purge and Ruleset changes all require explicit intent. --agent and --yes never grant it.
 
-CLOUDFLARE_READ_ONLY=1 hides every mutation and refuses direct calls to hidden names even with confirmation. CLOUDFLARE_ALLOW_DESTRUCTIVE=0 blocks all mutations even when confirmed; read-only takes precedence. Use narrow provider tokens as the authorization boundary. A model can assert confirm=true; clients and the human still decide whether the action was requested. This is not a cryptographic human approval.
+Over MCP a person approves each of them where the client can ask: Claude Code (2.1.246 and later) shows its own prompt, and a client that can show forms asks with an approval form whose one box starts unticked. Each approval is signed, bound to that exact call and works once. Where a client can do neither, the model's confirm:true counts. CLOUDFLARE_CONFIRM=model makes confirm:true enough everywhere, for an agent with no person to ask.
+
+CLOUDFLARE_READ_ONLY=1 hides every mutation and refuses direct calls to hidden names even with confirmation. CLOUDFLARE_ALLOW_DESTRUCTIVE=0 blocks all mutations even when confirmed; read-only takes precedence. Use narrow provider tokens as the authorization boundary. A model can assert confirm=true; where the client can ask, the person approves instead, and that approval is signed and bound to the exact call. Where it cannot, confirm=true is the model's assertion, not a person's approval.
 
 Review the exact zone/account, profile, record/rule IDs and full native body. apply_dns_batch additionally compares the reviewed request digest and makes one native request without automatic replay. Local preview does not authenticate the account, check conflicts or read remote state. Direct native batch also needs confirmation but does not require the digest.
 

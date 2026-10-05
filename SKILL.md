@@ -26,7 +26,8 @@ Use --agent for compact JSON and --select for needed output fields. Dashed comma
 | Exit | Meaning |
 | --- | --- |
 | 0 | Success |
-| 2 | Invalid usage or refused operation |
+| 1 | Unexpected error |
+| 2 | Invalid usage or refused operation, an unknown command or a hidden write |
 | 3 | Not found |
 | 4 | Authentication/permissions |
 | 5 | API/transport failure |
@@ -35,9 +36,9 @@ Use --agent for compact JSON and --select for needed output fields. Dashed comma
 
 ## Approval and scope
 
-Every one of the eleven mutations requires confirm=true in MCP or --confirm in the CLI. The same WriteGuard runs before file loading/provider execution. Creation, edits, replacement, deletion, cache purge and Ruleset changes all require explicit intent. --agent and --yes never grant it.
+Every one of the eleven mutations requires confirm=true in MCP or --confirm in the CLI. The same write guard runs before file loading/provider execution. Creation, edits, replacement, deletion, cache purge and Ruleset changes all require explicit intent. --agent and --yes never grant it. Over MCP the person approves each in the client's own prompt or form; confirm:true counts only where the client cannot ask.
 
-CLOUDFLARE_READ_ONLY=1 hides every mutation and refuses direct calls to hidden names even with confirmation. CLOUDFLARE_ALLOW_DESTRUCTIVE=0 blocks all mutations even when confirmed; read-only takes precedence. Use narrow provider tokens as the authorization boundary. A model can assert confirm=true; clients and the human still decide whether the action was requested. This is not a cryptographic human approval.
+CLOUDFLARE_READ_ONLY=1 hides every mutation and refuses direct calls to hidden names even with confirmation. CLOUDFLARE_ALLOW_DESTRUCTIVE=0 blocks all mutations even when confirmed; read-only takes precedence. Use narrow provider tokens as the authorization boundary. A model can assert confirm=true; where the client can ask, the person approves instead, and that approval is signed and bound to the exact call. Where it cannot, confirm=true is the model's assertion, not a person's approval.
 
 Review the exact zone/account, profile, record/rule IDs and full native body. apply_dns_batch additionally compares the reviewed request digest and makes one native request without automatic replay. Local preview does not authenticate the account, check conflicts or read remote state. Direct native batch also needs confirmation but does not require the digest.
 
@@ -109,4 +110,4 @@ After private environment configuration:
 codex mcp add cloudflare -- npx -y @thenavidm/cloudflare-mcp-cli@latest
 ```
 
-Optional Claude Code setup and the other clients are in INSTALL.md. Fresh matched-task usage evidence is pending; do not invent token savings.
+Optional Claude Code setup and the other clients are in INSTALL.md. Measured costs are in README section 7; do not invent token savings.

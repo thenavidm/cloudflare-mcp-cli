@@ -11,13 +11,13 @@
 
 Cloudflare MCP server and CLI for Codex and AI agents. **29 tools** for current DNS, cache, zone settings, Rulesets, Worker metadata and read-only analytics, with private accounts and explicit operation approval. One shared implementation supplies both binaries and a desktop bundle.
 
-Built and maintained by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=cloudflare-mcp-cli&utm_content=readme). The complete guide is on [navid.me](https://navid.me/mcp-servers/cloudflare).
+Built and maintained by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=cloudflare-mcp-cli&utm_content=readme). Built on [Slipway](https://github.com/thenavidm/slipway), which turns one definition of each tool into the MCP server and the CLI. The complete guide is on [navid.me](https://navid.me/mcp-servers/cloudflare).
 
 <img src="https://cdn.navid.me/repos/cloudflare-mcp-cli-retina.gif" alt="Illustrated workflow in the house terminal component" width="520">
 
 The terminal illustrates real command names and approval flow. It is not a recording of a provider account run. Cloudflare already has official CLI and hosted MCP products; their current schemas, approval policies and supported workflows are compared below.
 
-Requires Node 22+ and eligible Cloudflare API access for account operations. **Validation:** fixture tests, schema validation and protocol/artifact discovery are separate from provider-account outcomes, desktop GUI outcomes and fresh measured task/token evidence. Pending evidence is recorded, without invented success rates or efficiency claims.
+Requires Node 22+ and eligible Cloudflare API access for account operations. **Validation:** fixture tests, schema validation and protocol/artifact discovery are separate from provider-account outcomes and desktop GUI outcomes, which remain unverified. Section 7 has the measured token costs; no success rate is invented.
 
 ## Two ways to use it
 
@@ -171,7 +171,7 @@ Use the private env_vars TOML configuration in INSTALL.md to forward token/profi
 | --- | --- | --- |
 | Codex desktop / CLI | codex mcp add or private config.toml | Forward private env vars; choose CLI with SKILL.md for shell tasks |
 | Claude Desktop | Versioned .mcpb or manual local stdio | Set sensitive token/file, defaults and policy in private extension settings |
-| Claude Code | claude mcp add --scope user | Optional client; current measurements deferred |
+| Claude Code | claude mcp add --scope user | Optional client; section 7 has its measured costs |
 | Cursor | Private user mcp.json | Interpolation/envFile must refer to private local settings |
 | VS Code / Copilot | User MCP configuration | servers root and secure input prompts |
 | Windsurf | Private Cascade MCP settings | Reconnect after changes |
@@ -205,7 +205,7 @@ The house CLI derives tool flags from the same input schemas used by MCP. Tool n
 | tools / no command | Discover every command; confirmed mutations are marked |
 | COMMAND --help | Actual tool schema arguments |
 | schema COMMAND | Complete JSON input schema, including native payload unions/references |
-| --agent | --json --compact --no-input --no-color --yes; never implies --confirm |
+| --agent | Compact JSON and no prompts; never confirms a write |
 | --json / --compact | Machine JSON, optionally compact |
 | --select a,b.c | Local dotted result selection |
 | --payload / --payload-file | Native JSON body / private regular JSON file |
@@ -216,7 +216,8 @@ The house CLI derives tool flags from the same input schemas used by MCP. Tool n
 | Exit | Meaning |
 | --- | --- |
 | 0 | Success |
-| 2 | Invalid input or refused mutation |
+| 1 | Unexpected error |
+| 2 | Invalid input or refused mutation, an unknown command or a hidden write |
 | 3 | Not found |
 | 4 | Authentication/permission error |
 | 5 | Provider or transport failure |
@@ -234,7 +235,19 @@ Provider REST results retain success/result/result_info envelopes; query-only an
 | Official Code Mode | Small docs/search/execute interface and generated execution/result | Its provider claims are not our Codex measurements |
 | Read-only / bounded output | Fewer exposed writes, bounded pages and local --select | Policy/output bounds, not a measured token reduction |
 
-Use Codex first. Record client/model/package versions, date, loading mode, identical resource/task/output requirements and actual API usage for successful runs. CLI and MCP should perform the same task before comparing cost. No fresh matched Codex task-token results are published for 2.0.0. Claude Code benchmarking is deferred at Navid's instruction. Do not divide schema characters by four, borrow another repo's numbers, compare 29 tools against three Code Mode tools as a winner, or claim a universal CLI saving.
+Measured on 2026-10-05 against 2.0.1, the same day, with Claude Code 2.1.286 on Claude Opus 5.5 (one short prompt with and without the server connected, the difference read from the API's own usage figures) and Codex 0.159.3 on gpt-6.1-sol:
+
+| Cost | 2.0.1 | 3.0.0 |
+| --- | --- | --- |
+| Claude Code, every tool loaded, every message | 230,145 | 144,067 |
+| Claude Code's default, tool search, every message | 608 | 611 |
+| `SKILL.md`, read once | 3,930 | 4,014 |
+| Codex over the CLI, one task, median of five | 104,401 | 83,426 |
+| Codex over MCP, the same task, median of five | 40,548 | 41,139 |
+
+The task was "find the command that purges a zone's cache, and the flags it requires". Every tool loaded costs less because each native body appeared twice, as its own fields and inside `payload`, and 3.0.0 writes each repeated part once under `$defs`. Over the CLI, three 2.0.1 runs guessed a command that does not exist, `cache` or `schema` with no name, and every extra step carries the whole conversation forward; every 3.0.0 run read the help, asked `which` and read `purge-cache --help`. Over MCP, Codex prints its own TypeScript rendering of the tools it picks: it leaves the argument descriptions out of a tool whose schema is large, and sharing the repeats brought `purge_cache` under that size, so Codex now shows how to purge by tags, hosts or prefixes, 2,344 characters that 2.0.1's rendering left out. `SKILL.md` costs 84 more because it now says how approval works over MCP and lists every exit code.
+
+Do not compare 29 tools against three Code Mode tools as a winner or claim a universal CLI saving; no other offering was measured.
 
 ## 8. Every tool and argument
 
@@ -413,7 +426,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `include_shadow_metadata` | No; body and guard rules apply | boolean | Whether to include shadow metadata in the `meta` field of each record in the response. See [Shadowed records](https://developers.cloudflare.com/dns/manage-dns-records/reference/shadowed-records). default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | object | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -438,7 +451,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `include_shadow_metadata` | No; body and guard rules apply | boolean | Whether to include shadow metadata in the `meta` field of each record in the response. See [Shadowed records](https://developers.cloudflare.com/dns/manage-dns-records/reference/shadowed-records). default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | object | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -463,7 +476,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `include_shadow_metadata` | No; body and guard rules apply | boolean | Whether to include shadow metadata in the `meta` field of each record in the response. See [Shadowed records](https://developers.cloudflare.com/dns/manage-dns-records/reference/shadowed-records). default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | object | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -481,7 +494,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `dns_record_id` | Yes | dns-records_identifier | See current schema minLength: `1`. |
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 
 Native operation: `DELETE /zones/{zone_id}/dns_records/{dns_record_id}`; `dns-records-for-a-zone-delete-dns-record`. Native body not required. Schema discovery is local; endpoint permissions/plan decisions remain provider controlled.
 
@@ -506,7 +519,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `include_shadow_metadata` | No; body and guard rules apply | boolean | Whether to include shadow metadata in the `meta` field of each record in the response. See [Shadowed records](https://developers.cloudflare.com/dns/manage-dns-records/reference/shadowed-records). default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | object | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -543,7 +556,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | --- | --- | --- | --- |
 | `zone_id` | No; body and guard rules apply | cache-purge_identifier | The zone ID. minLength: `1`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | Union | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -576,7 +589,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | zones_identifier | See current schema minLength: `1`. |
 | `setting_id` | Yes | zones_setting_name | See current schema minLength: `1`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | Union | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -655,7 +668,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | rulesets_ZoneId | See current schema minLength: `1`. |
 | `dry_run` | No; body and guard rules apply | boolean | Validates the request without persisting changes when set to `true`. Responses that normally return 200 return `result: null`; endpoints that normally return 204 continue to return 204. default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | JSON | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -674,7 +687,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | rulesets_ZoneId | See current schema minLength: `1`. |
 | `dry_run` | No; body and guard rules apply | boolean | Validates the request without persisting changes when set to `true`. Responses that normally return 200 return `result: null`; endpoints that normally return 204 continue to return 204. default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | JSON | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -693,7 +706,7 @@ Every change requires explicit confirmation; never repeat an unknown outcome aut
 | `zone_id` | No; body and guard rules apply | rulesets_ZoneId | See current schema minLength: `1`. |
 | `dry_run` | No; body and guard rules apply | boolean | Validates the request without persisting changes when set to `true`. Responses that normally return 200 return `result: null`; endpoints that normally return 204 continue to return 204. default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 
 Native operation: `DELETE /zones/{zone_id}/rulesets/{ruleset_id}`; `deleteZoneRuleset`. Native body not required. Schema discovery is local; endpoint permissions/plan decisions remain provider controlled.
 
@@ -799,7 +812,7 @@ Verify the reviewed digest and submit one exact native DNS batch with mandatory 
 | `payload` | No; body and guard rules apply | object | See the full input schema. |
 | `payload_file` | No; body and guard rules apply | string | See the full input schema. minLength: `1`. |
 | `preview_sha256` | Yes | string | See the full input schema. pattern: `^[0-9a-f]{64}$`. |
-| `confirm` | No; body and guard rules apply | boolean | See the full input schema. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 
 #### analytics_query
 
@@ -909,7 +922,7 @@ Identical object shapes are listed once below. References point to the named def
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `include_shadow_metadata` | No; body and guard rules apply | boolean | Whether to include shadow metadata in the `meta` field of each record in the response. See [Shadowed records](https://developers.cloudflare.com/dns/manage-dns-records/reference/shadowed-records). default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | object | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -921,7 +934,7 @@ Identical object shapes are listed once below. References point to the named def
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `include_shadow_metadata` | No; body and guard rules apply | boolean | Whether to include shadow metadata in the `meta` field of each record in the response. See [Shadowed records](https://developers.cloudflare.com/dns/manage-dns-records/reference/shadowed-records). default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | object | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -932,7 +945,7 @@ Identical object shapes are listed once below. References point to the named def
 | `dns_record_id` | Yes | dns-records_identifier | See current schema minLength: `1`. |
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 
 ##### batch_dns_records
 
@@ -941,7 +954,7 @@ Identical object shapes are listed once below. References point to the named def
 | `zone_id` | No; body and guard rules apply | dns-records_identifier | See current schema minLength: `1`. |
 | `include_shadow_metadata` | No; body and guard rules apply | boolean | Whether to include shadow metadata in the `meta` field of each record in the response. See [Shadowed records](https://developers.cloudflare.com/dns/manage-dns-records/reference/shadowed-records). default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | object | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -960,7 +973,7 @@ Identical object shapes are listed once below. References point to the named def
 | --- | --- | --- | --- |
 | `zone_id` | No; body and guard rules apply | cache-purge_identifier | The zone ID. minLength: `1`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | Union | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -979,7 +992,7 @@ Identical object shapes are listed once below. References point to the named def
 | `zone_id` | No; body and guard rules apply | zones_identifier | See current schema minLength: `1`. |
 | `setting_id` | Yes | zones_setting_name | See current schema minLength: `1`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | Union | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -1035,7 +1048,7 @@ Identical object shapes are listed once below. References point to the named def
 | `zone_id` | No; body and guard rules apply | rulesets_ZoneId | See current schema minLength: `1`. |
 | `dry_run` | No; body and guard rules apply | boolean | Validates the request without persisting changes when set to `true`. Responses that normally return 200 return `result: null`; endpoints that normally return 204 continue to return 204. default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | JSON | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -1055,7 +1068,7 @@ Identical object shapes are listed once below. References point to the named def
 | `zone_id` | No; body and guard rules apply | rulesets_ZoneId | See current schema minLength: `1`. |
 | `dry_run` | No; body and guard rules apply | boolean | Validates the request without persisting changes when set to `true`. Responses that normally return 200 return `result: null`; endpoints that normally return 204 continue to return 204. default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 | `payload` | No; body and guard rules apply | JSON | Complete current native JSON request body. Do not mix with payload_file. |
 | `payload_file` | No; body and guard rules apply | string | Regular non-symlink local JSON request file, at most 1 MiB. No credentials in public files. minLength: `1`. |
 
@@ -1067,7 +1080,7 @@ Identical object shapes are listed once below. References point to the named def
 | `zone_id` | No; body and guard rules apply | rulesets_ZoneId | See current schema minLength: `1`. |
 | `dry_run` | No; body and guard rules apply | boolean | Validates the request without persisting changes when set to `true`. Responses that normally return 200 return `result: null`; endpoints that normally return 204 continue to return 204. default: `False`. |
 | `account` | No; body and guard rules apply | string | Exact private profile label. Account/zone defaults route inputs; token permissions remain provider controlled. |
-| `confirm` | No; body and guard rules apply | boolean | Must be true for the exact selected mutation, target and reviewed request. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 
 ##### list_page_rules
 
@@ -1136,7 +1149,7 @@ Identical object shapes are listed once below. References point to the named def
 | `payload` | No; body and guard rules apply | object | See the full input schema. |
 | `payload_file` | No; body and guard rules apply | string | See the full input schema. minLength: `1`. |
 | `preview_sha256` | Yes | string | See the full input schema. pattern: `^[0-9a-f]{64}$`. |
-| `confirm` | No; body and guard rules apply | boolean | See the full input schema. |
+| `confirm` | No; body and guard rules apply | boolean | Set true only when the user asked for exactly this action. |
 
 ##### analytics_query
 
@@ -2389,17 +2402,19 @@ account_id/zone_id are routing defaults; explicit operation inputs take preceden
 
 ## 12. Writing safely
 
-Every one of the eleven mutations requires confirm=true in MCP or --confirm in the CLI. The same WriteGuard runs before file loading/provider execution. Creation, edits, replacement, deletion, cache purge and Ruleset changes all require explicit intent. --agent and --yes never grant it.
+Every one of the eleven mutations requires confirm=true in MCP or --confirm in the CLI. The same write guard runs before file loading/provider execution. Creation, edits, replacement, deletion, cache purge and Ruleset changes all require explicit intent. --agent and --yes never grant it.
 
-CLOUDFLARE_READ_ONLY=1 hides every mutation and refuses direct calls to hidden names even with confirmation. CLOUDFLARE_ALLOW_DESTRUCTIVE=0 blocks all mutations even when confirmed; read-only takes precedence. Use narrow provider tokens as the authorization boundary. A model can assert confirm=true; clients and the human still decide whether the action was requested. This is not a cryptographic human approval.
+Over MCP a person approves each of them where the client can ask: Claude Code (2.1.246 and later) shows its own prompt, and a client that can show forms asks with an approval form whose one box starts unticked. Each approval is signed, bound to that exact call and works once. Where a client can do neither, the model's confirm:true counts. CLOUDFLARE_CONFIRM=model makes confirm:true enough everywhere, for an agent with no person to ask.
+
+CLOUDFLARE_READ_ONLY=1 hides every mutation and refuses direct calls to hidden names even with confirmation. CLOUDFLARE_ALLOW_DESTRUCTIVE=0 blocks all mutations even when confirmed; read-only takes precedence. Use narrow provider tokens as the authorization boundary. A model can assert confirm=true; where the client can ask, the person approves instead, and that approval is signed and bound to the exact call. Where it cannot, confirm=true is the model's assertion, not a person's approval.
 
 Review the exact zone/account, profile, record/rule IDs and full native body. apply_dns_batch additionally compares the reviewed request digest and makes one native request without automatic replay. Local preview does not authenticate the account, check conflicts or read remote state. Direct native batch also needs confirmation but does not require the digest.
 
-An optional CLOUDFLARE_AUDIT_LOG records timestamp, surface, tool, risk, static summary and decision. It excludes request bodies, account IDs and tokens. Existing file ACLs/rotation are your responsibility; a failed audit append does not block the action. Account data returned after a change is untrusted content.
+An optional CLOUDFLARE_AUDIT_LOG records timestamp, surface, tool, risk, static summary, decision and who approved it, then a done or failed line for each allowed call. It excludes request bodies, account IDs and tokens. Existing file ACLs/rotation are your responsibility; a failed audit append does not block the action. Account data returned after a change is untrusted content.
 
 ## 13. How the two surfaces work
 
-src/tools/index.ts builds one ALL_TOOLS catalogue from reviewed operation metadata and seven helpers. Both binaries use the same schemas, validation, profile routing, API client and WriteGuard. CLI command names are derived by converting underscores to hyphens; MCP uses stdio JSON-RPC and official SDK transport.
+src/tools/index.ts builds one ALL_TOOLS catalogue from reviewed operation metadata and seven helpers. [Slipway](https://github.com/thenavidm/slipway) builds both binaries from it: the MCP server, over stdio or `--http`, and the CLI, with the same schemas, validation, profile routing, API client and write guard. CLI command names are the tool names with hyphens.
 
 The server can initialize/discover without credentials. Local helper annotations accurately distinguish local work from provider calls. API requests use one fixed origin, no arbitrary headers or redirects and no automatic retries. Current selected body schemas use Ajv with formats; analytics is parsed through GraphQL's AST before fetch. Version comes from package.json; the desktop manifest/root lock must agree.
 
@@ -2433,6 +2448,12 @@ Configure these privately in the environment of the actual client process. The p
 | `CLOUDFLARE_AUDIT_LOG` | Optional private append-only metadata path |
 | `CLOUDFLARE_REQUEST_TIMEOUT_MS` | Default 30000; integer 100–300000; no automatic retry |
 | `CLOUDFLARE_MIN_REQUEST_INTERVAL_MS` | Default 200; integer 0–10000; per profile/process |
+| `CLOUDFLARE_CONFIRM` | `human` by default; `model` lets confirm:true alone approve over MCP, for an agent with no person to ask |
+| `CLOUDFLARE_SURFACE` | `full` by default; `search` lists three tools that find, describe and run the rest |
+| `CLOUDFLARE_TOOL_TIMEOUT_MS` | Give up on any tool after this long |
+| `CLOUDFLARE_HTTP_PORT`, `CLOUDFLARE_HTTP_HOST`, `CLOUDFLARE_HTTP_TOKEN` | For `--http`: port 8787 and host 127.0.0.1 by default; any other host needs the bearer token |
+| `CLOUDFLARE_HTTP_ALLOWED_ORIGINS` | Comma-separated browser origins allowed to call `--http`; a page from any other site is refused |
+| `CLOUDFLARE_DEBUG` | `1` prints debug lines on stderr |
 
 Credential/profile fields are strings without line breaks. Only 1/true enables read-only; 0/false disables destructive operations. Named profile keys are name, api_key or api_token, token_file, account_id, zone_id and token_kind. api_key is a compatibility field name holding a Bearer token, never a Global API Key.
 
@@ -2511,11 +2532,12 @@ Private legacy source is retained separately and never pushed into clean public 
 
 | Component | Reviewed version / source |
 | --- | --- |
-| Owned package / desktop | 2.0.0 |
+| Owned package / desktop | 3.0.0 |
 | Legacy source package | 1.0.0; private source b6fef82d992cefbfb4ea9a9ea49e17275609c34e |
 | Cloudflare REST API schema | API info 4.0.0; commit 37e7a4ae9c5123a2c58929a100c42cb4584edc57 |
 | Official cf / Wrangler | 1.0.0-beta.12 / 4.147.0 at review |
-| @modelcontextprotocol/sdk | 1.32.0 |
+| @thenavidm/slipway | 0.1.14 |
+| MCP TypeScript SDK, through Slipway | 2.3.0 |
 | ajv | 8.20.0 |
 | ajv-formats | 3.0.1 |
 | graphql | 16.14.2 |
@@ -2658,7 +2680,7 @@ One parsed GraphQL query at a time, with variables and provider-controlled datas
 <details>
 <summary><b>Is CLI more token-efficient than MCP?</b></summary>
 
-That requires identical successful tasks and actual client/model usage. No fresh matched Codex token result is published; character estimates, schema counts and borrowed metrics are not evidence.
+It depends on the client and the task. In Claude Code the CLI costs nothing until it is used, plus about 4,000 tokens for `SKILL.md` once, where the server costs about 610 tokens a message with tool search and 144,000 with every tool loaded. In Codex, finding the command that purges a zone's cache took a median of 83,426 input tokens over the CLI and 41,139 over MCP. Section 7 has how each was measured.
 
 </details>
 
@@ -2691,7 +2713,7 @@ If this is useful, star the repo and come say hi on [X](https://x.com/thenavidm)
 
 ## Dependencies
 
-Runtime: MCP TypeScript SDK, Ajv, ajv-formats and GraphQL. Development: TypeScript, Vitest, Vite and MCPB. Exact component versions are above and in package-lock.json. Reviewed Cloudflare API schema metadata is BSD-3-Clause and credited in THIRD_PARTY_NOTICES.md; packaging development tools are excluded from runtime bundles.
+Runtime: Slipway, which brings the MCP TypeScript SDK, plus Ajv, ajv-formats and GraphQL. Development: TypeScript, Vitest, Vite and MCPB. Exact component versions are above and in package-lock.json. Reviewed Cloudflare API schema metadata is BSD-3-Clause and credited in THIRD_PARTY_NOTICES.md; packaging development tools are excluded from runtime bundles.
 
 ## License
 
