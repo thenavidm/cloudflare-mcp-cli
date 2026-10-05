@@ -2532,11 +2532,11 @@ Private legacy source is retained separately and never pushed into clean public 
 
 | Component | Reviewed version / source |
 | --- | --- |
-| Owned package / desktop | 3.0.0 |
+| Owned package / desktop | 3.0.1 |
 | Legacy source package | 1.0.0; private source b6fef82d992cefbfb4ea9a9ea49e17275609c34e |
 | Cloudflare REST API schema | API info 4.0.0; commit 37e7a4ae9c5123a2c58929a100c42cb4584edc57 |
 | Official cf / Wrangler | 1.0.0-beta.12 / 4.147.0 at review |
-| @thenavidm/slipway | 0.1.14 |
+| @thenavidm/slipway | 0.1.17 |
 | MCP TypeScript SDK, through Slipway | 2.3.0 |
 | ajv | 8.20.0 |
 | ajv-formats | 3.0.1 |

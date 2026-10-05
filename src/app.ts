@@ -39,6 +39,9 @@ export const INSTRUCTIONS = "Cloudflare focused current REST management, local s
 /** Helpers that never leave this machine. */
 const LOCAL = new Set(["list_accounts", "get_operation_schema", "preview_operation", "preview_dns_batch"]);
 
+/** What 2.x's refusal said a confirmed call can do; the refusal and the approval form say it again. */
+const WHY = "may affect DNS, routing, security or account configuration";
+
 const GENERIC_CODES = new Set(["USAGE", "CONFIG", "RATE_LIMIT", "AUTH", "API_ERROR"]);
 
 const LOGIN_HINT = "Run `cloudflare-cli login` for what to set.";
@@ -77,6 +80,7 @@ function toTool(spec: ToolSpec): Tool<Context> {
     risk: spec.risk,
     // 2.x asked for confirmation where the risk === "destructive".
     requireConfirm: spec.risk === "destructive",
+    ...(spec.risk === "destructive" ? { consequence: WHY } : {}),
     openWorld: !LOCAL.has(spec.name),
     summary: () => spec.title,
     handler: async (args, ctx) => {

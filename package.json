@@ -1,6 +1,6 @@
 {
   "name": "@thenavidm/cloudflare-mcp-cli",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Focused Cloudflare MCP and shared CLI with current DNS/Rulesets schemas, private profiles and reviewed mutation workflows.",
   "type": "module",
   "main": "./dist/index.js",
@@ -24,7 +24,7 @@
     "check:discovery": "node scripts/check-discovery.mjs"
   },
   "dependencies": {
-    "@thenavidm/slipway": "^0.1.14",
+    "@thenavidm/slipway": "^0.1.17",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "graphql": "^16.14.2"
